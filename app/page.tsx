@@ -52,9 +52,6 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="mt-12 text-center text-gray-400 text-sm">
-              <p>For full conversion capabilities, try our <a href="https://github.com/yourusername/change-formate" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">self-hosted Docker version</a></p>
-            </div>
           </div>
         </div>
         <Footer />
