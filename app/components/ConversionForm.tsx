@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { isLibreOfficeFormat, isValidFormat, getValidConversions } from '../utils/formats';
 import { canConvertInBrowser, convertImageInBrowser } from '../utils/clientConversion';
+import { getConversionEndpoint, supportsLibreOfficeConversions } from '../utils/environment';
 
 export default function ConversionForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -10,6 +11,23 @@ export default function ConversionForm() {
   const [conversionComplete, setConversionComplete] = useState(false);
   const [convertedFileUrl, setConvertedFileUrl] = useState<string | null>(null);
   const [isDropping, setIsDropping] = useState(false);
+  const [libreOfficeAvailable, setLibreOfficeAvailable] = useState<boolean | null>(null);
+  const [selfHostInfo, setSelfHostInfo] = useState<boolean>(false);
+
+  // Check if LibreOffice is available on mount
+  useEffect(() => {
+    async function checkLibreOffice() {
+      try {
+        const available = await supportsLibreOfficeConversions();
+        setLibreOfficeAvailable(available);
+      } catch (e) {
+        console.error("Failed to check LibreOffice availability:", e);
+        setLibreOfficeAvailable(false);
+      }
+    }
+    
+    checkLibreOffice();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -20,6 +38,7 @@ export default function ConversionForm() {
     setError(null);
     setConversionComplete(false);
     setConvertedFileUrl(null);
+    setSelfHostInfo(false);
     
     if (file) {
       if (isValidFormat(file)) {
@@ -29,6 +48,11 @@ export default function ConversionForm() {
         
         if (validFormats.length > 0) {
           setTargetFormat(validFormats[0]);
+        }
+        
+        // Check if conversion requires LibreOffice and it's not available
+        if (isLibreOfficeFormat(extension) && libreOfficeAvailable === false) {
+          setError("Note: This file requires LibreOffice for conversion. Some conversions may not be available in the cloud deployment.");
         }
         
         // If PDF is selected, show PDF conversion message
@@ -49,6 +73,7 @@ export default function ConversionForm() {
     setError(null);
     setConversionComplete(false);
     setConvertedFileUrl(null);
+    setSelfHostInfo(false);
 
     try {
       const sourceFormat = selectedFile.name.split('.').pop()?.toLowerCase() || '';
@@ -68,6 +93,10 @@ export default function ConversionForm() {
         }
       }
       
+      // Get the appropriate endpoint for conversion
+      const endpoint = getConversionEndpoint();
+      console.log(`Using conversion endpoint: ${endpoint}`);
+      
       // Continue with server-side conversion...
       // Create form data
       const formData = new FormData();
@@ -82,7 +111,7 @@ export default function ConversionForm() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
       
-      const response = await fetch('/api/convert', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
         signal: controller.signal
@@ -90,22 +119,31 @@ export default function ConversionForm() {
       
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        let errorMessage = 'Conversion failed';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.details || errorMessage;
-        } catch (e) {
-          console.error('Error parsing error response', e);
-        }
-        throw new Error(errorMessage);
-      }
-
-      // Check content type to verify we got actual file data, not an error response
+      // Check if response is JSON (error or special instruction)
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || errorData.details || 'Unexpected error during conversion');
+        const jsonResponse = await response.json();
+        
+        // Handle cloud conversion response
+        if (jsonResponse.clientSideConversion) {
+          setError('This conversion should be handled in the browser. Please try a different format combination.');
+          setIsConverting(false);
+          return;
+        }
+        
+        // Handle errors
+        if (jsonResponse.error) {
+          // Check if this is a self-hosting recommendation
+          if (jsonResponse.selfHostingInfo) {
+            setSelfHostInfo(true);
+            throw new Error(jsonResponse.details || jsonResponse.error);
+          }
+          throw new Error(jsonResponse.error || jsonResponse.details || 'Unexpected error during conversion');
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error('Conversion service returned an error status');
       }
 
       // Get the converted file blob
@@ -216,6 +254,19 @@ export default function ConversionForm() {
         </div>
       )}
 
+      {/* Show self-hosting info when needed */}
+      {selfHostInfo && (
+        <div className="text-amber-400 text-sm mt-2 bg-amber-500/10 p-3 rounded-lg">
+          <p className="mb-2"><strong>Note:</strong> This conversion requires LibreOffice, which is not available in the cloud environment.</p>
+          <p>For full conversion capabilities, you can:</p>
+          <ul className="list-disc ml-5 mt-1">
+            <li>Use our <a href="https://github.com/yourusername/change-formate" className="underline" target="_blank" rel="noopener noreferrer">self-hosted Docker version</a></li>
+            <li>Try a different file format combination</li>
+            <li>For image files, use the browser-based conversion</li>
+          </ul>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-center gap-4">
         <select
           value={targetFormat}
@@ -227,7 +278,7 @@ export default function ConversionForm() {
             <optgroup label="Recommended Formats" className="bg-gray-800">
               {getValidConversions(selectedFile.name.split('.').pop()?.toLowerCase() || '').map(format => (
                 <option key={format} value={format}>
-                  {format.toUpperCase()} {isLibreOfficeFormat(format) ? '(LibreOffice)' : ''}
+                  {format.toUpperCase()} {isLibreOfficeFormat(format) && !libreOfficeAvailable ? '(Requires self-hosting)' : ''}
                 </option>
               ))}
             </optgroup>

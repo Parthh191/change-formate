@@ -1,13 +1,15 @@
-# File Format Converter
+# Change Format - File Converter
 
-A web application for converting files between different formats using LibreOffice.
+A web application that converts files between different formats. Supports documents, spreadsheets, presentations, and images.
 
 ## Features
 
-- Convert between document formats (PDF, DOCX, ODT, etc.)
-- Convert between spreadsheet formats (XLSX, ODS, CSV)
-- Convert between presentation formats (PPTX, ODP)
-- Convert between image formats
+- Convert documents (PDF, DOC, DOCX, ODT, RTF, TXT)
+- Convert spreadsheets (XLS, XLSX, ODS, CSV)
+- Convert presentations (PPT, PPTX, ODP)
+- Convert images (JPG, PNG, GIF, SVG, WEBP)
+- Browser-based conversions for compatible formats
+- Server-side conversions for complex formats using LibreOffice
 
 ## Requirements
 
@@ -46,6 +48,32 @@ npm run dev
 yarn dev
 ```
 
+## Deployment Options
+
+### Cloud Deployment (Vercel, Netlify)
+
+Cloud deployments have limited conversion capabilities due to the lack of LibreOffice in serverless environments.
+
+1. Clone the repository
+2. Deploy to Vercel or Netlify
+3. Only browser-compatible conversions will work (most image formats)
+
+### Self-Hosted Deployment (Full Capabilities)
+
+For full conversion capabilities, use Docker:
+
+```bash
+# Build the Docker image
+docker build -t change-formate .
+
+# Run the container
+docker run -p 3000:3000 change-formate
+```
+
+### Environment Variables
+
+- `CONVERSION_API_KEY`: (Optional) API key for external conversion service
+
 ## Troubleshooting PDF Conversions
 
 Converting PDFs can be challenging due to their nature:
@@ -82,6 +110,26 @@ POST /api/convert
 Form data parameters:
 - `file`: The file to convert
 - `targetFormat`: The desired output format (e.g., "pdf", "docx")
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Check LibreOffice installation
+node scripts/check-libreoffice.js
+```
+
+## Technologies
+
+- Next.js
+- LibreOffice (for file conversions)
+- TypeScript
+- Docker
 
 ## License
 

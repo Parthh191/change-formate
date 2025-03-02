@@ -2,8 +2,16 @@
 import Background from './components/Background';
 import Footer from './components/Footer';
 import ConversionForm from './components/ConversionForm';
+import { useState, useEffect } from 'react';
+import { detectEnvironment } from './utils/environment';
 
 export default function Home() {
+  const [environment, setEnvironment] = useState<string | null>(null);
+  
+  useEffect(() => {
+    setEnvironment(detectEnvironment());
+  }, []);
+
   return (
     <>
       <Background />
@@ -15,6 +23,14 @@ export default function Home() {
                 File Format Converter
               </h1>
               <p className="text-gray-400 text-lg">Transform your files with ease</p>
+              
+              {environment === 'vercel' && (
+                <div className="mt-4 p-3 bg-blue-500/10 rounded-lg inline-block">
+                  <p className="text-blue-300 text-sm">
+                    ⓘ Cloud deployment detected. Some conversions may require the self-hosted version.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="bg-gray-900/50 backdrop-blur-xl p-8 rounded-2xl shadow-[0_0_50px_-12px] shadow-purple-500/20 border border-gray-800/50">
@@ -34,6 +50,10 @@ export default function Home() {
                 <h3 className="font-semibold mb-2 text-purple-300">Free to Use</h3>
                 <p className="text-gray-400 text-sm">No registration required, convert files for free</p>
               </div>
+            </div>
+            
+            <div className="mt-12 text-center text-gray-400 text-sm">
+              <p>For full conversion capabilities, try our <a href="https://github.com/yourusername/change-formate" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">self-hosted Docker version</a></p>
             </div>
           </div>
         </div>
