@@ -56,7 +56,8 @@ async function convertWithLibreOffice(inputPath: string, outputDir: string, targ
           reject(new Error('No converted output file found'));
         }
       } catch (dirErr) {
-        reject(new Error(`Failed to locate output file: ${dirErr.message}`));
+        const errorMessage = dirErr instanceof Error ? dirErr.message : String(dirErr);
+        reject(new Error(`Failed to locate output file: ${errorMessage}`));
       }
     });
   });
@@ -221,7 +222,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         error: 'File conversion failed', 
-        details: (error as Error).message 
+        details: error instanceof Error ? error.message : String(error) 
       },
       { status: 500 }
     );
