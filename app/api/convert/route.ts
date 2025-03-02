@@ -15,8 +15,9 @@ async function convertWithLibreOffice(inputPath: string, outputDir: string, targ
     
     console.log('Executing command:', command);
     
-    const timeout = 60000; // 60 seconds timeout for PDF conversions which can take longer
-    exec(command, { timeout }, async (error, stdout, stderr) => {
+    const timeout = 120000; // Increase timeout to 120 seconds for conversions
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const process = exec(command, { timeout }, async (error, stdout, stderr) => {
       if (error) {
         console.error('LibreOffice conversion error:', error);
         console.error('Stderr:', stderr);
@@ -123,7 +124,8 @@ export async function POST(request: NextRequest) {
           console.log('Executing alternative PDF command:', alternativeCommand);
           
           await new Promise<void>((resolve, reject) => {
-            exec(alternativeCommand, { timeout: 60000 }, (error, stdout, _stderr) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const altProcess = exec(alternativeCommand, { timeout: 120000 }, (error, stdout, _stderr) => {
               if (error) {
                 console.error('Alternative PDF conversion error:', error);
                 return reject(error);
