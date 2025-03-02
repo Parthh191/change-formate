@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { isLibreOfficeFormat, isValidFormat, getValidConversions } from '../utils/formats';
+import { canConvertInBrowser, convertImageInBrowser } from '../utils/clientConversion';
 
 export default function ConversionForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -50,6 +51,24 @@ export default function ConversionForm() {
     setConvertedFileUrl(null);
 
     try {
+      const sourceFormat = selectedFile.name.split('.').pop()?.toLowerCase() || '';
+      
+      // Check if we can convert in the browser
+      if (canConvertInBrowser(sourceFormat, targetFormat)) {
+        console.log('Using client-side conversion');
+        // For image conversions
+        if (['png', 'jpg', 'jpeg', 'webp'].includes(sourceFormat) && 
+            ['png', 'jpg', 'jpeg', 'webp'].includes(targetFormat)) {
+          const convertedBlob = await convertImageInBrowser(selectedFile, targetFormat);
+          const url = URL.createObjectURL(convertedBlob);
+          setConvertedFileUrl(url);
+          setConversionComplete(true);
+          setIsConverting(false);
+          return;
+        }
+      }
+      
+      // Continue with server-side conversion...
       // Create form data
       const formData = new FormData();
       formData.append('file', selectedFile);
