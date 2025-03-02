@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     
     // Choose the appropriate Cloudmersive endpoint based on formats
     let endpoint = '';
-    let formDataForApi = new FormData();
+    const formDataForApi = new FormData();
     formDataForApi.append('inputFile', file);
     
     if (sourceFormat === 'pdf' && targetFormat === 'docx') {

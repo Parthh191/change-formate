@@ -35,7 +35,7 @@ interface ZamzarJobResponse {
     id: number;
     name: string;
   }[];
-  [key: string]: any; // Allow other properties
+  [key: string]: unknown; // Allow other properties
 }
 
 /**

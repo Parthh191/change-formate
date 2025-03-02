@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * Endpoint to test if your conversion API key is working correctly
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check if the API key is set
     if (!process.env.CONVERSION_API_KEY) {
