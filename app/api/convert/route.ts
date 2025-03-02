@@ -16,7 +16,7 @@ async function convertWithLibreOffice(inputPath: string, outputDir: string, targ
     console.log('Executing command:', command);
     
     const timeout = 60000; // 60 seconds timeout for PDF conversions which can take longer
-    const process = exec(command, { timeout }, async (error, stdout, stderr) => {
+    exec(command, { timeout }, async (error, stdout, stderr) => {
       if (error) {
         console.error('LibreOffice conversion error:', error);
         console.error('Stderr:', stderr);
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     try {
       // First attempt with PDF-specific parameters if needed
       outputPath = await convertWithLibreOffice(inputPath, tempDir, targetFormat, isFromPdf);
-    } catch (libreOfficeError) {
+    } catch (_libreOfficeError) { // eslint-disable-line @typescript-eslint/no-unused-vars
       console.log('First conversion attempt failed, trying alternative approach...');
       
       try {
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
           console.log('Executing alternative PDF command:', alternativeCommand);
           
           await new Promise<void>((resolve, reject) => {
-            exec(alternativeCommand, { timeout: 60000 }, (error, stdout, stderr) => {
+            exec(alternativeCommand, { timeout: 60000 }, (error, stdout, _stderr) => { // eslint-disable-line @typescript-eslint/no-unused-vars
               if (error) {
                 console.error('Alternative PDF conversion error:', error);
                 return reject(error);
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
         } else {
           throw new Error('Initial conversion failed and no alternative method available');
         }
-      } catch (alternativeError) {
+      } catch (_alternativeError) { // eslint-disable-line @typescript-eslint/no-unused-vars
         console.error('All conversion attempts failed');
         return NextResponse.json(
           { 
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
       await fs.access(inputPath);
       await fs.unlink(inputPath);
       console.log('Cleaned up input file');
-    } catch (err) {
+    } catch (_err) { // eslint-disable-line @typescript-eslint/no-unused-vars
       console.log('Input file already removed or not found');
     }
     
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
       await fs.access(outputPath);
       await fs.unlink(outputPath);
       console.log('Cleaned up output file');
-    } catch (err) {
+    } catch (_err) { // eslint-disable-line @typescript-eslint/no-unused-vars
       console.log('Output file already removed or not found');
     }
 

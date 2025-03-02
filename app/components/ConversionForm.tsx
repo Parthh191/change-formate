@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FORMAT_GROUPS, isLibreOfficeFormat, isValidFormat, getValidConversions } from '../utils/formats';
+import { isLibreOfficeFormat, isValidFormat, getValidConversions } from '../utils/formats';
 
 export default function ConversionForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

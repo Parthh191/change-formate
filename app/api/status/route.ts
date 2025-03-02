@@ -2,6 +2,28 @@ import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import os from 'os';
 
+// Interface used for documenting our structure
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface SystemStatus {
+  libreoffice: {
+    installed: boolean;
+    version: string | null;
+    error?: string;
+  };
+  system: {
+    platform: string;
+    memory: {
+      total: number;
+      free: number;
+    };
+    cpu: {
+      cores: number;
+      model: string;
+      speed: number;
+    };
+  };
+}
+
 export async function GET() {
   try {
     // Check LibreOffice
@@ -25,15 +47,16 @@ export async function GET() {
       },
       libreOffice: libreOfficeInfo,
     });
-  } catch (error) {
+  } catch (_error) { // eslint-disable-line @typescript-eslint/no-unused-vars
     return NextResponse.json(
-      { error: 'Status check failed', details: (error as Error).message },
+      { error: 'Status check failed' },
       { status: 500 }
     );
   }
 }
 
-async function checkLibreOffice(): Promise<any> {
+// Fix the stderr unused variable
+async function checkLibreOffice(): Promise<{ installed: boolean; version: string | null; command?: string }> {
   // Try different commands
   const commands = [
     'libreoffice --version',
@@ -48,7 +71,7 @@ async function checkLibreOffice(): Promise<any> {
         version: info.trim(),
         command,
       };
-    } catch (error) {
+    } catch (error) { // eslint-disable-line @typescript-eslint/no-unused-vars
       // Try next command
     }
   }
@@ -59,7 +82,7 @@ async function checkLibreOffice(): Promise<any> {
 
 function runCommand(command: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    exec(command, (error, stdout, _stderr) => { // eslint-disable-line @typescript-eslint/no-unused-vars
       if (error) {
         reject(new Error(`Command failed: ${error.message}`));
       } else {
