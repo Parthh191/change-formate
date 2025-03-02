@@ -1,56 +1,88 @@
 # File Format Converter
 
-A web-based file format converter built with Next.js that allows users to easily convert files between different formats.
-
-Live Demo: [https://change-formate.vercel.app/](https://change-formate.vercel.app/)
+A web application for converting files between different formats using LibreOffice.
 
 ## Features
 
-- Clean and modern UI with a dark theme
-- Support for multiple file format conversions
-- Real-time file processing
-- Responsive design for all devices
-- File drag and drop support
-- Secure file handling
+- Convert between document formats (PDF, DOCX, ODT, etc.)
+- Convert between spreadsheet formats (XLSX, ODS, CSV)
+- Convert between presentation formats (PPTX, ODP)
+- Convert between image formats
 
-## Tech Stack
+## Requirements
 
-- [Next.js 14](https://nextjs.org/) - React framework
-- [Tailwind CSS](https://tailwindcss.com/) - For styling
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Vercel](https://vercel.com) - Deployment platform
+- Node.js 14+
+- LibreOffice (must be installed on the server)
 
-## Getting Started
+## Setup
 
-1. Clone the repository:
-```bash
-git clone https://github.com/Parthh191/chan-formate.git
-cd chan-formate
-```
+1. Install dependencies:
 
-2. Install dependencies:
 ```bash
 npm install
+# or
+yarn install
 ```
 
-3. Run the development server:
+2. Make sure LibreOffice is installed on your system:
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install libreoffice
+
+# macOS
+brew install libreoffice
+# or download from https://www.libreoffice.org/
+
+# Windows
+# Download from https://www.libreoffice.org/
+```
+
+3. Run the application:
+
 ```bash
 npm run dev
+# or
+yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Troubleshooting PDF Conversions
 
-## Contributing
+Converting PDFs can be challenging due to their nature:
 
-Contributions are welcome! Feel free to open issues and submit pull requests.
+1. **Text-based PDFs vs. Scanned Documents**:
+   - Text-based PDFs usually convert better than scanned documents
+   - Scanned PDFs are essentially images and may not convert properly to text formats
+
+2. **PDF to Document formats**:
+   - PDF to DOCX/DOC conversion works best when the PDF contains actual text
+   - Formatting may not be perfectly preserved
+   - Tables and complex layouts may be simplified
+
+3. **PDF to Spreadsheet formats**:
+   - Only works well if the PDF contains well-structured tabular data
+   - Complex layouts may not convert properly
+
+4. **Timeout Issues**:
+   - Large PDFs may take longer to convert
+   - Try splitting large PDFs into smaller files
+
+5. **LibreOffice Installation**:
+   - Ensure LibreOffice is properly installed on your server
+   - Run `node scripts/check-libreoffice.js` to verify the installation
+
+## API Usage
+
+The application exposes a conversion API endpoint:
+
+```
+POST /api/convert
+```
+
+Form data parameters:
+- `file`: The file to convert
+- `targetFormat`: The desired output format (e.g., "pdf", "docx")
 
 ## License
 
-This project is open source and available under the MIT License.
-
-## Author
-
-- Parth Tyagi
-- Portfolio: [https://coderwizardparthtyagi.netlify.app/](https://coderwizardparthtyagi.netlify.app/)
-- GitHub: [https://github.com/Parthh191](https://github.com/Parthh191)
-- LinkedIn: [https://www.linkedin.com/in/pathh191](https://www.linkedin.com/in/pathh191)
+MIT

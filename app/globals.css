@@ -40,7 +40,7 @@ body {
 }
 
 .animate-gradient {
-  background-size: 300% auto;
+  background-size: 300% 300%;
   animation: gradient 8s ease infinite;
 }
 
